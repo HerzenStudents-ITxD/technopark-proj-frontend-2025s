@@ -1,0 +1,173 @@
+:root {
+  --color-primary: #68ACC6;
+}
+
+.btn {
+  border-radius: 0.7rem !important;
+}
+
+.btn-border {
+  background-color: white !important;
+  border-color: var(--color-primary) !important;
+}
+
+.btn-main-color {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+}
+
+.btn-main-color:hover {
+  background-color: #7fbdd6 !important;
+  border-color: #7fbdd6 !important;
+}
+
+.main-color {
+  color: var(--color-primary) !important;
+}
+
+.btn-custom-back {
+  color: black !important;
+  transition: color 0.2s !important;
+}
+
+.btn-custom-back:hover {
+  color: #68ACC6 !important;
+}
+
+/* .btn-border-custom:hover {
+  box-shadow: 0 0 0 0.25rem rgba(104, 172, 198, 0.25) !important;
+} */
+
+.custom-focus:focus {
+  border-color: #68ACC6 !important;
+  box-shadow: 0 0 0 0.25rem rgba(104, 172, 198, 0.25) !important;
+}
+
+.custom-focus:hover {
+  border-color: #68ACC6 !important;
+  box-shadow: 0 0 0 0.25rem rgba(104, 172, 198, 0.25) !important;
+}
+
+.selector-container {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+  width: 100%; /* Или нужная вам ширина */
+}
+
+.horizontal-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 1rem; /* Добавляем место для скроллбара */
+  -webkit-overflow-scrolling: touch; /* Для плавного скролла на iOS */
+}
+
+.horizontal-scroll-wrapper {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 1rem; /* Отступ между карточками */
+  padding: 0.5rem;
+}
+
+.scroll-card {
+  flex: 0 0 auto;
+  width: 266px; /* Фиксированная ширина карточки, можно изменить */
+}
+
+/* Скрываем стандартный скроллбар для красоты */
+.horizontal-scroll-container::-webkit-scrollbar {
+  height: 12px;
+}
+
+.horizontal-scroll-container::-webkit-scrollbar-track {
+  background: #E4EFF4;
+  border-radius: 6px;
+}
+
+.horizontal-scroll-container::-webkit-scrollbar-thumb {
+  background: #68ACC6;
+  border-radius: 6px;
+}
+
+.horizontal-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #7fbdd6;
+}
+
+.ticket {
+  background-color: #E4EFF4 !important;
+  border-color: #E4EFF4 !important;
+  color: black !important;
+}
+
+.ticket:hover {
+  background-color: #d7e3e9 !important;
+  border-color: #d7e3e9 !important;
+}
+
+.drag-over {
+    background-color: #f0f8ff !important;
+    border: 1px dashed #68ACC6 !important;
+}
+
+
+/* Стили для лейбла
+.selector-label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.react-select-wrapper {
+  width: 100%;
+}
+
+.react-select__control {
+  border-radius: 4px !important;
+  min-height: 38px !important;
+}
+
+.react-select__value-container {
+  padding: 2px 8px !important;
+} */
+
+/* #root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+} */

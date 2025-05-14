@@ -8,7 +8,7 @@ import EditProjectPage from './pages/EditProjectPage';
 function App() {
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/technopark-proj">
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="project" element={<ProjectPage />} />

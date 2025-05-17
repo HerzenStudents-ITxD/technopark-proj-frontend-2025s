@@ -24,7 +24,8 @@ const EditProjectPage = () => {
         sprintDuration: 1, // 1 неделя по умолчанию
         startDate: new Date().toISOString().split('T')[0], // текущая дата
         instituteId: null,
-        schoolId: null
+		schoolId: null,
+        studentIds: []
     });
 
     useEffect(() => {
@@ -74,8 +75,14 @@ const EditProjectPage = () => {
     };
 
     const handleSelectChange = (name, value) => {
+    if (name === 'studentIds') {
+        // For studentIds, we expect an array of values
+        setFormData(prev => ({...prev, [name]: value}));
+    } else {
+        // For other fields, keep the single value behavior
         setFormData(prev => ({...prev, [name]: parseInt(value)}));
-    };
+    }
+};
 
     const handleDateChange = (e) => {
         setFormData(prev => ({...prev, startDate: e.target.value}));
@@ -92,7 +99,7 @@ const EditProjectPage = () => {
                 StartDate: formData.startDate,
                 InstituteId: formData.instituteId,
                 SchoolId: formData.schoolId,
-                StudentId: formData.studentId
+                StudentIds: formData.studentIds.map(id => parseInt(id))
             };
 
             await createProject(projectData);
@@ -197,15 +204,17 @@ const EditProjectPage = () => {
                 </Row>
                 <Selector
                     label="Студенты"
-                    options={students.map(student => ({
-                        value: student.studentId.toString(),
-                        label: student.fullName
-                    }))}
-                    onChange={(selectedOption) => {
-                        handleSelectChange('studentId', selectedOption.value);
-                    }}
-                    sm1="4"
-                    sm2="8"
+					options={students.map(student => ({
+						value: student.studentId.toString(),
+						label: student.fullName
+					}))}
+					onChange={(selectedOptions) => {
+						const values = selectedOptions ? selectedOptions.map(option => option.value) : [];
+						handleSelectChange('studentIds', values);
+					}}
+					isMulti={true}
+					sm1="4"
+					sm2="8"
                 />
                 <Row>
                     <Col sm="8">

@@ -18,9 +18,13 @@ export default function Selector(props) {
                 <Select
                     className="mb-3"
                     options={selectOptions}
-                    value={selectOptions.find(opt => opt.value === props.value)}
+					value={props.isMulti 
+                        ? selectOptions.filter(opt => props.value?.includes(opt.value))
+                        : selectOptions.find(opt => opt.value === props.value)
+                    }
                     onChange={props.onChange}
                     placeholder={props.placeholder || "Выберите..."}
+					isMulti={props.isMulti}
                     styles={{
                         control: (base, { isFocused }) => ({
                             ...base,

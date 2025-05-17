@@ -25,6 +25,8 @@ export default function Selector(props) {
                     onChange={props.onChange}
                     placeholder={props.placeholder || "Выберите..."}
 					isMulti={props.isMulti}
+					closeMenuOnSelect={!props.isMulti}
+					hideSelectedOptions={false}
                     styles={{
                         control: (base, { isFocused }) => ({
                             ...base,
@@ -46,6 +48,25 @@ export default function Selector(props) {
                             '&:active': {
                                 backgroundColor: '#68ACC6',
                                 color: 'white'
+                            }
+                        }),
+						multiValue: (base) => ({
+                            ...base,
+                            backgroundColor: '#E1F0F7',
+                            borderRadius: '4px',
+                            padding: '2px 6px'
+                        }),
+                        multiValueLabel: (base) => ({
+                            ...base,
+                            color: '#2A6476',
+                            fontWeight: '500'
+                        }),
+                        multiValueRemove: (base) => ({
+                            ...base,
+                            color: '#2A6476',
+                            ':hover': {
+                                backgroundColor: '#C4E3F3',
+                                color: '#1D4E5D'
                             }
                         })
                     }}

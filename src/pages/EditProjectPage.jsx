@@ -75,18 +75,46 @@ const EditProjectPage = () => {
     };
 
     const handleSelectChange = (name, value) => {
-    if (name === 'studentIds') {
-        // For studentIds, we expect an array of values
-        setFormData(prev => ({...prev, [name]: value}));
-    } else {
-        // For other fields, keep the single value behavior
-        setFormData(prev => ({...prev, [name]: parseInt(value)}));
-    }
-};
+		if (name === 'studentIds') {
+			setFormData(prev => {
+				// Get the newly selected option value (last item in the array)
+				const newValue = value[value.length - 1]?.value;
+				
+				// If no new value (like when clearing), return empty array
+				if (!newValue) {
+					return {...prev, [name]: []};
+				}
+				
+				// Check if this student is already selected
+				const isAlreadySelected = prev.studentIds.includes(newValue);
+				
+				// If already selected, return previous state unchanged
+				if (isAlreadySelected) {
+					return prev;
+				}
+				
+				// Otherwise add the new student to the selection
+				return {
+					...prev,
+					[name]: [...prev.studentIds, newValue]
+				};
+			});
+		} else {
+			// For other fields, keep the single value behavior
+			setFormData(prev => ({...prev, [name]: parseInt(value)}));
+		}
+	};
 
     const handleDateChange = (e) => {
         setFormData(prev => ({...prev, startDate: e.target.value}));
     };
+	
+	const handleRemoveStudent = (studentIdToRemove) => {
+		setFormData(prev => ({
+			...prev,
+			studentIds: prev.studentIds.filter(id => id !== studentIdToRemove)
+		}));
+	};
 
     const handleSubmit = async () => {
         try {
@@ -206,16 +234,51 @@ const EditProjectPage = () => {
                     label="Студенты"
 					options={students.map(student => ({
 						value: student.studentId.toString(),
-						label: student.fullName
+						label: student.fullName,
 					}))}
 					onChange={(selectedOptions) => {
-						const values = selectedOptions ? selectedOptions.map(option => option.value) : [];
-						handleSelectChange('studentIds', values);
+						handleSelectChange('studentIds', selectedOptions);
 					}}
 					isMulti={true}
+					isSearchable={true}
+					hideSelectedOptions={false}
 					sm1="4"
 					sm2="8"
+					value={formData.studentIds.map(id => {
+						const student = students.find(s => s.studentId.toString() === id);
+						return {
+							value: id,
+							label: student ? `${student.fullName} (ID: ${id})` : id
+						};
+					})}
                 />
+				{formData.studentIds.length > 0 && (
+					<div className="mt-2 mb-3">
+						<small className="text-muted">Выбрано студентов: {formData.studentIds.length}</small>
+						<div className="d-flex flex-wrap gap-2 mt-2">
+							{formData.studentIds.map(id => {
+								const student = students.find(s => s.studentId.toString() === id);
+								return student ? (
+									<span key={id} className="badge bg-info text-dark p-2 d-flex align-items-center">
+										{student.fullName}
+										<button 
+											type="button" 
+											className="btn-close btn-close-white ms-2" 
+											style={{fontSize: '0.5rem'}}
+											onClick={(e) => {
+												e.preventDefault();
+												e.stopPropagation();
+												handleRemoveStudent(id);
+											}}
+											aria-label={`Удалить ${student.fullName}`}
+										/>
+									</span>
+								) : null;
+							})}
+						</div>
+					</div>
+				)}
+				
                 <Row>
                     <Col sm="8">
                         <Selector

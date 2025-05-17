@@ -1,7 +1,7 @@
 const API_BASE_URL = 'http://localhost:5132';
 
 export async function getProjects(search = '') {
-    const response = await fetch(`${API_BASE_URL}/controller/project?search=${encodeURIComponent(search)}`, {
+    const response = await fetch(`${API_BASE_URL}/controller/project/all-projects?search=${encodeURIComponent(search)}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

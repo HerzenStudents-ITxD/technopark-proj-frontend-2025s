@@ -30,7 +30,7 @@ export default function CardProj() {
     return (
         <div className='row' style={{marginTop:'4%'}}>
             {projects.map((project) => (
-                <div className='col-4' style={{marginBottom:'4%'}}>
+                <div className='col-4' style={{marginBottom:'4%'}} key={project.projectId}>
                     <Card
                         style={{ width: '22rem', height:'40vh', border: "1px solid #68ACC6"}}
                         onClick={(e) => navigate('/project')}

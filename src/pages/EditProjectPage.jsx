@@ -163,8 +163,8 @@ const EditProjectPage = () => {
                                 { value: "4", label: "4" },
                             ]}
                             onChange={(selectedOption) => handleSelectChange('course', selectedOption.value)}
-                            sm1="5"
-                            sm2="7"
+                            sm1="4"
+                            sm2="8"
                         />
                     </Col>
                 </Row>
@@ -190,8 +190,8 @@ const EditProjectPage = () => {
                                 { value: "2025", label: "2025" },
                             ]}
                             onChange={(selectedOption) => handleSelectChange('year', selectedOption.value)}
-                            sm1="5"
-                            sm2="7"
+                            sm1="4"
+                            sm2="8"
                         />
                     </Col>
                 </Row>
@@ -221,16 +221,20 @@ const EditProjectPage = () => {
                         />
                     </Col>
                     <Col sm="4">
-                        <div className="mb-3">
-                            <label htmlFor="startDate" className="form-label">Дата начала</label>
-                            <input 
-                                type="date" 
-                                className="form-control" 
-                                id="startDate"
-                                value={formData.startDate}
-                                onChange={handleDateChange}
-                            />
-                        </div>
+                        <Row className="mb-3">
+                            <Col sm="4">
+                                <label htmlFor="startDate" className="form-label">Старт</label>
+                            </Col>
+                            <Col sm="8">
+                                <input 
+                                    type="date" 
+                                    className="form-control" 
+                                    id="startDate"
+                                    value={formData.startDate}
+                                    onChange={handleDateChange}
+                                />
+                            </Col>
+                        </Row>
                         {/* <Selector
                             label="Дата начала"
                             options={[

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ButtonBack from "../components/ButtonBack";
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -6,35 +6,73 @@ import { Button } from 'react-bootstrap';
 import CardSprint from "../components/CardSprint";
 import CardBacklog from "../components/CardBacklog";
 import TicketModal from './TicketModal';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getProjectById } from '../services/api';
 
 const ProjectPage = () => {
+    const { id } = useParams();
     const navigate = useNavigate();
+    const [project, setProject] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [sprints, setSprints] = useState([]);
+    const [backlogTickets, setBacklogTickets] = useState([]);
     // Инициализируем спринты и бэклог
-    const [sprints, setSprints] = useState([
-        { 
-            title: "Спринт 1", 
-            tickets: [
-                { title: "Задача спринта 1", status: "1" },
-                { title: "Задача спринта 2", status: "0" }
-            ] 
-        },
-        { 
-            title: "Спринт 2", 
-            tickets: [
-                { title: "Задача спринта 3", status: "2" }
-            ] 
-        },
-        { title: "Спринт 3", tickets: [] },
-        { title: "Спринт 4", tickets: [] },
-        { title: "Спринт 5", tickets: [] },
-    ]);
+    // const [sprints, setSprints] = useState([
+    //     { 
+    //         title: "Спринт 1", 
+    //         tickets: [
+    //             { title: "Задача спринта 1", status: "1" },
+    //             { title: "Задача спринта 2", status: "0" }
+    //         ] 
+    //     },
+    //     { 
+    //         title: "Спринт 2", 
+    //         tickets: [
+    //             { title: "Задача спринта 3", status: "2" }
+    //         ] 
+    //     },
+    //     { title: "Спринт 3", tickets: [] },
+    //     { title: "Спринт 4", tickets: [] },
+    //     { title: "Спринт 5", tickets: [] },
+    // ]);
 
-    const [backlogTickets, setBacklogTickets] = useState([
-        { title: "Задача 1", status: "0" },
-        { title: "Задача 2", status: "1" },
-        { title: "Задача 3", status: "2" },
-    ]);
+    // const [backlogTickets, setBacklogTickets] = useState([
+    //     { title: "Задача 1", status: "0" },
+    //     { title: "Задача 2", status: "1" },
+    //     { title: "Задача 3", status: "2" },
+    // ]);
+
+    useEffect(() => {
+        const fetchProject = async () => {
+            try {
+                const response = await getProjectById(id);
+                if (response.projects && response.projects.length > 0) {
+                    const projectData = response.projects[0];
+                    setProject(projectData);
+                    
+                    // Преобразование данных спринтов и тикетов из API
+                    // Здесь нужно адаптировать под вашу структуру данных
+                    const transformedSprints = projectData.sprints?.map(sprint => ({
+                        tickets: sprint.tickets?.map(ticket => ({
+                            title: ticket.name,
+                            status: ticket.status.toString()
+                        })) || []
+                    })) || [];
+                    
+                    setSprints(transformedSprints);
+                    // Бэклог может быть отдельным полем или вам нужно его вычислять
+                    setBacklogTickets([]); // Или заполнить из данных проекта
+                }
+                setLoading(false);
+            } catch (err) {
+                setError(err.message);
+                setLoading(false);
+            }
+        };
+        
+        fetchProject();
+    }, [id]);
 
     // Обработчики для drag and drop
     const handleDragStart = (e, ticket, source) => {
@@ -125,33 +163,48 @@ const ProjectPage = () => {
         }
     };
 
+    if (loading) return <div>Загрузка...</div>;
+    if (error) return <div>Ошибка: {error}</div>;
+    if (!project) return <div>Проект не найден</div>;
+
     return (
         <>
             <ButtonBack link="/" />
 
             <div className="mt-5" style={{ marginLeft: '20vw', marginRight: '20vw' }}>
                 <Row>
-                    <Col><div className="main-color btn-border text-uppercase">Весна 2025</div></Col>
-                    <Col><Button
-                        className='btn-main-color float-end'
-                        onClick={(e) => navigate('/project/edit')}
-                    >
-                        Редактировать
-                    </Button></Col>
-
+                    <Col>
+                        <div className="main-color btn-border text-uppercase">
+                            {project.semester ? "Осень" : "Весна"} {project.year}
+                        </div>
+                    </Col>
+                    <Col>
+                        <Button
+                            className='btn-main-color float-end'
+                            onClick={(e) => navigate('/project/${id}/edit')}
+                        >
+                            Редактировать
+                        </Button>
+                    </Col>
                 </Row>
-                <h3 className="mt-3">Название проекта</h3>
+                <h3 className="mt-3">{project.projectName}</h3>
                 <Row className="mt-3">
-                    <Col sm="8"><div>Описание проекта Описание проекта Описание проекта Описание проекта Описание проекта</div></Col>
+                    <Col sm="8"><div>{project.description}</div></Col>
                 </Row>
 
                 <div className="mt-3">
-                    <Button className='me-2 main-color btn-border text-uppercase btn-border-custom'>ИНСТИТУТ</Button>
-                    <Button className='me-2 main-color btn-border text-uppercase btn-border-custom'>НАПРАВЛЕНИЕ</Button>
-                    <Button className='main-color btn-border text-uppercase btn-border-custom'>1 КУРС</Button>
+                    <Button className='me-2 main-color btn-border text-uppercase btn-border-custom'>{project.instituteName}</Button>
+                    <Button className='me-2 main-color btn-border text-uppercase btn-border-custom'>{project.schoolName}</Button>
+                    <Button className='main-color btn-border text-uppercase btn-border-custom'>{project.course} КУРС</Button>
                 </div>
 
-                <div className="mt-3">Студенты: </div>
+                <div className="mt-3">
+                    Студенты: {project.students?.map(student => (
+                        <span key={student.id} className="me-2">
+                            {student.name}
+                        </span>
+                    ))} 
+                </div>
 
                 {/* Спринты */}
                 <div className="horizontal-scroll-container mt-4">

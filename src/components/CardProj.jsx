@@ -33,7 +33,7 @@ export default function CardProj() {
                 <div className='col-4' style={{marginBottom:'4%'}} key={project.projectId}>
                     <Card
                         style={{ width: '22rem', height:'40vh', border: "1px solid #68ACC6"}}
-                        onClick={(e) => navigate('/project')}
+                        onClick={(e) => navigate(`/project/${project.projectId}`)}
                     >
                         <Card.Body className="d-flex flex-column">
                             <Card.Text className='main-color text-uppercase'>{project.semester?"Осень":"Весна"}{" "}{project.year}</Card.Text>

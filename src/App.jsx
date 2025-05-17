@@ -11,7 +11,7 @@ function App() {
     <BrowserRouter basename="/technopark-proj">
       <Routes>
         <Route path="/" element={<MainPage />} />
-        <Route path="project" element={<ProjectPage />} />
+        <Route path="project/:id" element={<ProjectPage />} />
         <Route path="project/edit" element={<EditProjectPage />} />
       </Routes>
     </BrowserRouter>

@@ -5,9 +5,15 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { Button } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
-import { getInstitutes, getStudents, getSchoolsByInstitute, createProject, getStudentsBySchool } from '../services/api';
+import { getInstitutes, getStudents, getSchoolsByInstitute, createProject, getStudentsBySchool, getProjectForEdit, updateProject } from '../services/api';
+import { useParams } from 'react-router-dom';
 
 const EditProjectPage = () => {
+    const { id } = useParams();
+    const isEditMode = !!id;
+
+    const [isLoading, setIsLoading] = useState(false);
+
     const [institutes, setInstitutes] = useState([]);
 	const [allStudents, setAllStudents] = useState([]);
     const [filteredStudents, setFilteredStudents] = useState([]);
@@ -99,6 +105,68 @@ const EditProjectPage = () => {
 		}
 	}, [selectedSchoolId, allStudents]);
 
+     useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const institutesResponse = await getInstitutes();
+                setInstitutes(institutesResponse.institutes);
+                
+                const studentsResponse = await getStudents();
+                setAllStudents(studentsResponse.students);
+                
+                if (isEditMode) {
+                    const projectResponse = await getProjectForEdit(id);
+                    const project = projectResponse.project;
+                    
+
+                    if (projectResponse.project) {  // ⚠️ Добавьте проверку!
+                        setFormData({
+                            name: projectResponse.project.name || '',  // Защита от undefined
+                            description: projectResponse.project.description || '',
+                            course: projectResponse.project.course || 1,
+                            year: projectResponse.project.year || new Date().getFullYear(),
+                            semester: projectResponse.project.semester || 1,
+                            sprintDuration: projectResponse.project.sprintDuration || 7,
+                            startDate: projectResponse.project.startDate || new Date().toISOString().split('T')[0],
+                            instituteId: projectResponse.project.instituteId || null,
+                            schoolId: projectResponse.project.schoolId || null,
+                            studentIds: projectResponse.project.studentIds ? projectResponse.project.studentIds.map(id => id.toString()) : []
+                        });
+                    }
+
+                    console.log(projectResponse.project.instituteId);
+                    // Устанавливаем выбранные институт и направление
+
+                    setSelectedInstituteId(projectResponse.project.instituteId);
+                    if (projectResponse.project.schoolId) {
+                        const schoolsResponse = await getSchoolsByInstitute(projectResponse.project.instituteId);
+                        setSchools(schoolsResponse.schools);
+                        setSelectedSchoolId(projectResponse.project.schoolId.toString());
+                        
+                        const studentsResponse = await getStudentsBySchool(projectResponse.project.schoolId);
+                        setFilteredStudents(studentsResponse.students);
+                    }
+                }
+            } catch (err) {
+                setError(err.message);
+            }
+        };
+        
+        fetchData();
+    }, [id, isEditMode]);
+
+    const validateForm = () => {
+        if (!formData.name) {
+            setError('Название проекта обязательно');
+            return false;
+        }
+        if (!formData.schoolId) {
+            setError('Необходимо выбрать направление');
+            return false;
+        }
+        return true;
+    };
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({...prev, [name]: value}));
@@ -147,6 +215,8 @@ const EditProjectPage = () => {
 	};
 
     const handleSubmit = async () => {
+        if (!validateForm()) return;
+        setIsLoading(true);
         try {
             const projectData = {
                 Name: formData.name,
@@ -160,10 +230,17 @@ const EditProjectPage = () => {
                 StudentIds: formData.studentIds.map(id => parseInt(id))
             };
 
-            await createProject(projectData);
-            alert('Проект успешно создан!');
+            if (isEditMode) {
+                await updateProject(id, projectData);
+                alert('Проект успешно обновлен!');
+            } else {
+                await createProject(projectData);
+                alert('Проект успешно создан!');
+            }
         } catch (err) {
             setError(err.message);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -171,7 +248,7 @@ const EditProjectPage = () => {
         <>
             <ButtonBack link="/" />
 
-            <h3 className="mt-4" style={{marginLeft: '16vw'}}>Редактор проекта</h3>
+            <h3 className="mt-4" style={{marginLeft: '16vw'}}>{isEditMode ? 'Редактирование проекта' : 'Создание проекта'}</h3>
 
             <div className="mt-5" style={{marginLeft: '25vw', marginRight: '25vw'}}>
                 <Forma
@@ -262,7 +339,7 @@ const EditProjectPage = () => {
                 </Row>
                 <Selector
 					label="Студенты"
-					options={formData.schoolId ? filteredStudents.map(student => ({
+					options={formData.schoolId && Array.isArray(filteredStudents) ? filteredStudents.map(student => ({
 						value: student.studentId.toString(),
 						label: student.fullName,
 					})) : []}
@@ -274,13 +351,13 @@ const EditProjectPage = () => {
 					hideSelectedOptions={false}
 					sm1="4"
 					sm2="8"
-					value={formData.studentIds.map(id => {
+					value={Array.isArray(formData.studentIds) ? formData.studentIds.map(id => {
 						const student = allStudents.find(s => s.studentId.toString() === id);
 						return {
 							value: id,
 							label: student ? `${student.fullName} (ID: ${id})` : id
 						};
-					})}
+					}): []}
 					placeholder={formData.schoolId ? "Выберите студентов" : "Сначала выберите направление"}
 				/>
 				{formData.studentIds.length > 0 && (
@@ -360,8 +437,9 @@ const EditProjectPage = () => {
                 <Button
                     className='btn-main-color float-end mt-5'
                     onClick={handleSubmit}
+                    disabled={isLoading}
                 >
-                    Сохранить изменения
+                    {isLoading ? 'Сохранение...' : 'Сохранить изменения'}
                 </Button>
             </div>
 

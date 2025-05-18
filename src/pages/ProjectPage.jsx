@@ -26,6 +26,7 @@ const ProjectPage = () => {
                 if (response.projects && response.projects.length > 0) {
                     const projectData = response.projects[0];
                     setProject(projectData);
+                    console.log(projectData);
                     
                     // Преобразование данных спринтов и тикетов из API
                     const transformedSprints = projectData.sprints?.map(sprint => ({
@@ -179,8 +180,6 @@ const handleDrop = async (e, target) => {
 
 	const handleSaveTask = async (updatedTask) => {
         try {
-            console.log(updatedTask);
-            console.log(taskSource.type);
             const response = await updateTicket(updatedTask.id, {
                     Name: updatedTask.title,
                     Status: parseInt(updatedTask.status),
@@ -240,7 +239,7 @@ const handleDrop = async (e, target) => {
                     <Col>
                         <Button
                             className='btn-main-color float-end'
-                            onClick={(e) => navigate('/project/${id}/edit')}
+                            onClick={(e) => navigate(`/project/${id}/edit`)}
                         >
                             Редактировать
                         </Button>
@@ -258,9 +257,9 @@ const handleDrop = async (e, target) => {
                 </div>
 
                 <div className="mt-3">
-                    Студенты: {project.students?.map(student => (
+                    Студенты: {project.studentsData?.map(student => (
                         <span key={student.id} className="me-2">
-                            {student.name}
+                            {student.fullName} | 
                         </span>
                     ))} 
                 </div>

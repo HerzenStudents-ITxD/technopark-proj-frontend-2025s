@@ -138,3 +138,27 @@ export const updateTicket = async (ticketId, ticketData) => {
     
     return await response.json();
 };
+
+export const getProjectForEdit = async (id) => {
+    const response = await fetch(`${API_BASE_URL}/controller/project/edit/${id}`);
+    if (!response.ok) {
+        throw new Error('Failed to fetch project data');
+    }
+    return await response.json();
+};
+
+export const updateProject = async (id, projectData) => {
+    const response = await fetch(`${API_BASE_URL}/controller/project/update-project/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(projectData)
+    });
+    
+    if (!response.ok) {
+        throw new Error('Failed to update project');
+    }
+    
+    return await response.json();
+};

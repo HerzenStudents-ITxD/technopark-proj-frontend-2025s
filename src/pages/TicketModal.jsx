@@ -5,6 +5,7 @@ import Form from 'react-bootstrap/Form';
 import Forma from "../components/Forma";
 import Selector from '../components/Selector';
 import { FormGroup } from 'react-bootstrap';
+import Select from 'react-select';
 
 export default function TicketModal({
     show,
@@ -37,6 +38,12 @@ export default function TicketModal({
         handleClose();
     };
 
+    const options = [
+        { value: '0', label: 'Не начата' },
+        { value: '1', label: 'В работе' },
+        { value: '2', label: 'Завершена' },
+    ];
+
     return (
         <Modal show={show} onHide={handleClose}>
             <Modal.Header closeButton>
@@ -61,6 +68,7 @@ export default function TicketModal({
                                 onTitleChange?.(e.target.value);
                             }}
                             required
+                            className="custom-focus"
                             //readOnly={!isNew}
                         />
                     </Form.Group>
@@ -79,17 +87,51 @@ export default function TicketModal({
                             sm2="8"
                         /> */}
                         <Form.Label>Статус</Form.Label>
-                        <Form.Select 
+                        <Select
+                            options={options}
+                            value={options.find(opt => opt.value === status)}
+                            onChange={(selectedOption) => {
+                                setStatus(selectedOption.value);
+                                onStatusChange?.(selectedOption.value);
+                            }}
+                            styles={{
+                                control: (base, { isFocused }) => ({
+                                ...base,
+                                borderColor: isFocused ? '#68ACC6' : '#ced4da',
+                                boxShadow: isFocused ? '0 0 0 0.25rem rgba(104, 172, 198, 0.25)' : 'none',
+                                '&:hover': {
+                                    borderColor: '#68ACC6',
+                                    boxShadow:'0 0 0 0.25rem rgba(104, 172, 198, 0.25)'
+                                },
+                                }),
+                                option: (base, { isFocused, isSelected }) => ({
+                                ...base,
+                                backgroundColor: isSelected
+                                    ? '#68ACC6'
+                                    : isFocused
+                                    ? 'rgba(104, 172, 198, 0.1)'
+                                    : 'white',
+                                color: isSelected ? 'white' : 'black',
+                                '&:active': {
+                                    backgroundColor: '#68ACC6',
+                                    color: 'white',
+                                },
+                                }),
+                            }}
+                        />
+                        {/* <Form.Select 
                             value={status} 
                             onChange={(e) => {
                                 setStatus(e.target.value);
                                 onStatusChange?.(e.target.value);
                             }}
+                            className='custom-focus custom-select'
                         >
                             <option value="0">Не начата</option>
                             <option value="1">В работе</option>
                             <option value="2">Завершена</option>
-                        </Form.Select>
+                        </Form.Select> */}
+
                     </FormGroup>
                     
                     <Form.Group className="mb-3">
@@ -102,6 +144,7 @@ export default function TicketModal({
                                 setDescription(e.target.value);
                                 onDescriptionChange?.(e.target.value);
                             }}
+                            className="custom-focus"
                         />
                     </Form.Group>
                 </Modal.Body>

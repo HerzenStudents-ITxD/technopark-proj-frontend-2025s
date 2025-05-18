@@ -52,14 +52,14 @@
   display: flex;
   flex-direction: column;
   margin-bottom: 1rem;
-  width: 100%; /* Или нужная вам ширина */
+  width: 100%;
 }
 
 .horizontal-scroll-container {
   width: 100%;
   overflow-x: auto;
-  padding-bottom: 1rem; /* Добавляем место для скроллбара */
-  -webkit-overflow-scrolling: touch; /* Для плавного скролла на iOS */
+  padding-bottom: 1rem;
+  -webkit-overflow-scrolling: touch;
 }
 
 .horizontal-scroll-wrapper {

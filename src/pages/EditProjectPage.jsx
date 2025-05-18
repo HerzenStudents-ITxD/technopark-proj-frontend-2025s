@@ -389,11 +389,11 @@ const EditProjectPage = () => {
                             {formData.studentIds.map(id => {
                                 const student = allStudents.find(s => s.studentId.toString() === id);
                                 return student ? (
-                                    <span key={id} className="badge bg-info text-dark p-2 d-flex align-items-center">
+                                    <span key={id} className="ticket text-dark fw-normal badge p-2 d-flex align-items-center">
                                         {student.fullName}
                                         <button 
                                             type="button" 
-                                            className="btn-close btn-close-white ms-2" 
+                                            className="btn-close btn-close-black ms-2" 
                                             style={{fontSize: '0.5rem'}}
                                             onClick={(e) => {
                                                 e.preventDefault();

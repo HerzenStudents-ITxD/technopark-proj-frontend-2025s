@@ -75,11 +75,13 @@ const ProjectPage = () => {
     }, [id]);
 
     // Обработчики для drag and drop
-    const handleDragStart = (e, ticket, source) => {
-        e.dataTransfer.setData('ticket', JSON.stringify(ticket));
-        e.dataTransfer.setData('source', JSON.stringify(source));
-    };
-
+	const handleDragStart = (e, ticket, source) => {
+		e.dataTransfer.setData('ticket', JSON.stringify(ticket));
+		e.dataTransfer.setData('source', JSON.stringify({
+			type: source.type,
+			sprintId: source.sprintId // using ID instead of title
+		}));
+	};
     const handleDragOver = (e) => {
         e.preventDefault();
         e.currentTarget.classList.add('drag-over');
@@ -90,47 +92,47 @@ const ProjectPage = () => {
     };
 
     const handleDrop = (e, target) => {
-        e.preventDefault();
-        e.currentTarget.classList.remove('drag-over');
+		e.preventDefault();
+		e.currentTarget.classList.remove('drag-over');
 
-        const ticketData = e.dataTransfer.getData('ticket');
-        const sourceData = e.dataTransfer.getData('source');
-        
-        if (!ticketData || !sourceData) return;
+		const ticketData = e.dataTransfer.getData('ticket');
+		const sourceData = e.dataTransfer.getData('source');
+		
+		if (!ticketData || !sourceData) return;
 
-        const ticket = JSON.parse(ticketData);
-        const source = JSON.parse(sourceData);
+		const ticket = JSON.parse(ticketData);
+		const source = JSON.parse(sourceData);
 
-        // Удаляем задачу из исходного места
-        if (source.type === 'backlog') {
-            setBacklogTickets(prev => prev.filter(t => t.title !== ticket.title));
-        } else {
-            setSprints(prev => prev.map(sprint => {
-                if (sprint.id === source.sprintId) {
-                    return {
-                        ...sprint,
-                        tickets: sprint.tickets.filter(t => t.title !== ticket.title)
-                    };
-                }
-                return sprint;
-            }));
-        }
+		// Remove from source
+		if (source.type === 'backlog') {
+			setBacklogTickets(prev => prev.filter(t => t.id !== ticket.id));
+		} else {
+			setSprints(prev => prev.map(sprint => {
+				if (sprint.id === source.sprintId) {
+					return {
+						...sprint,
+						tickets: sprint.tickets.filter(t => t.id !== ticket.id)
+					};
+				}
+				return sprint;
+			}));
+		}
 
-        // Добавляем задачу в новое место
-        if (target.type === 'backlog') {
-            setBacklogTickets(prev => [...prev, ticket]);
-        } else {
-            setSprints(prev => prev.map(sprint => {
-                if (sprint.id === target.sprintId) {
-                    return {
-                        ...sprint,
-                        tickets: [...sprint.tickets, ticket]
-                    };
-                }
-                return sprint;
-            }));
-        }
-    };
+		// Add to target
+		if (target.type === 'backlog') {
+			setBacklogTickets(prev => [...prev, ticket]);
+		} else {
+			setSprints(prev => prev.map(sprint => {
+				if (sprint.id === target.sprintId) {
+					return {
+						...sprint,
+						tickets: [...sprint.tickets, ticket]
+					};
+				}
+				return sprint;
+			}));
+		}
+	};
 
     const [showModal, setShowModal] = useState(false);
     const [selectedTask, setSelectedTask] = useState(null);
@@ -142,26 +144,26 @@ const ProjectPage = () => {
         setShowModal(true);
     };
 
-    const handleSaveTask = (updatedTask) => {
-        if (taskSource.type === 'backlog') {
-            setBacklogTickets(prev => 
-            prev.map(t => t.title === updatedTask.title ? updatedTask : t)
-            );
-        } else {
-            setSprints(prev => 
-            prev.map(sprint => {
-                if (sprint.id === taskSource.sprintId) {
-                return {
-                    ...sprint,
-                    tickets: sprint.tickets.map(t => 
-                    t.title === updatedTask.title ? updatedTask : t)
-                    };
-                }
-                return sprint;
-            })
-            );
-        }
-    };
+	const handleSaveTask = (updatedTask) => {
+		if (taskSource.type === 'backlog') {
+			setBacklogTickets(prev => 
+				prev.map(t => t.id === updatedTask.id ? updatedTask : t)
+			);
+		} else {
+			setSprints(prev => 
+				prev.map(sprint => {
+					if (sprint.id === taskSource.sprintId) {
+						return {
+							...sprint,
+							tickets: sprint.tickets.map(t => 
+								t.id === updatedTask.id ? updatedTask : t)
+						};
+					}
+					return sprint;
+				})
+			);
+		}
+	};
 
     if (loading) return <div>Загрузка...</div>;
     if (error) return <div>Ошибка: {error}</div>;
@@ -211,23 +213,23 @@ const ProjectPage = () => {
                     <div className="horizontal-scroll-wrapper">
                         {sprints.map((sprint, index) => (
                             <CardSprint
-                                key={index}
+                                key={sprint.id}
                                 sprint={sprint}
                                 index={index}
                                 onTaskClick={(task) => handleTaskClick(task, { 
-                                type: 'sprint', 
-                                sprintTitle: sprint.title
-                                })}
+									type: 'sprint', 
+									sprintId: sprint.id // using ID instead of title
+								})}
                                 onDragStart={(e, ticket) => handleDragStart(e, ticket, { 
-                                    type: 'sprint', 
-                                    sprintTitle: sprint.title 
-                                })}
+									type: 'sprint', 
+									sprintId: sprint.id // using ID instead of title
+								})}
                                 onDragOver={handleDragOver}
                                 onDragLeave={handleDragLeave}
-                                onDrop={(e) => handleDrop(e, { 
-                                    type: 'sprint', 
-                                    sprintTitle: sprint.title
-                                })}
+								onDrop={(e) => handleDrop(e, { 
+									type: 'sprint', 
+									sprintId: sprint.id // using ID instead of title
+								})}
                             />
                         ))}
                     </div>

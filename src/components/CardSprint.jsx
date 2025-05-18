@@ -1,7 +1,7 @@
 import { Card, Button } from 'react-bootstrap';
-import { RecordFill } from "react-bootstrap-icons"
+import { RecordFill } from "react-bootstrap-icons";
 
-export default function CardSprint({ sprint, onDragStart, onDragOver, onDragLeave, onDrop, onTaskClick }) {
+export default function CardSprint({ sprint, onDragStart, onDragOver, onDragLeave, onDrop, onTaskClick, index }) {
     return (
         <Card
             className="scroll-card"
@@ -16,7 +16,7 @@ export default function CardSprint({ sprint, onDragStart, onDragOver, onDragLeav
             onDrop={onDrop}
         >
             <Card.Body>
-                <Card.Title>{sprint.title}</Card.Title>
+                <Card.Title>Спринт {index + 1}</Card.Title>
                 {sprint.tickets.map((ticket, index) => (
                     <Button
                         key={`${sprint.title}-${index}`}

@@ -17,31 +17,6 @@ const ProjectPage = () => {
     const [error, setError] = useState(null);
     const [sprints, setSprints] = useState([]);
     const [backlogTickets, setBacklogTickets] = useState([]);
-    // Инициализируем спринты и бэклог
-    // const [sprints, setSprints] = useState([
-    //     { 
-    //         title: "Спринт 1", 
-    //         tickets: [
-    //             { title: "Задача спринта 1", status: "1" },
-    //             { title: "Задача спринта 2", status: "0" }
-    //         ] 
-    //     },
-    //     { 
-    //         title: "Спринт 2", 
-    //         tickets: [
-    //             { title: "Задача спринта 3", status: "2" }
-    //         ] 
-    //     },
-    //     { title: "Спринт 3", tickets: [] },
-    //     { title: "Спринт 4", tickets: [] },
-    //     { title: "Спринт 5", tickets: [] },
-    // ]);
-
-    // const [backlogTickets, setBacklogTickets] = useState([
-    //     { title: "Задача 1", status: "0" },
-    //     { title: "Задача 2", status: "1" },
-    //     { title: "Задача 3", status: "2" },
-    // ]);
 
     useEffect(() => {
         const fetchProject = async () => {
@@ -131,7 +106,7 @@ const ProjectPage = () => {
             setBacklogTickets(prev => prev.filter(t => t.title !== ticket.title));
         } else {
             setSprints(prev => prev.map(sprint => {
-                if (sprint.title === source.sprintTitle) {
+                if (sprint.id === source.sprintId) {
                     return {
                         ...sprint,
                         tickets: sprint.tickets.filter(t => t.title !== ticket.title)
@@ -146,7 +121,7 @@ const ProjectPage = () => {
             setBacklogTickets(prev => [...prev, ticket]);
         } else {
             setSprints(prev => prev.map(sprint => {
-                if (sprint.title === target.sprintTitle) {
+                if (sprint.id === target.sprintId) {
                     return {
                         ...sprint,
                         tickets: [...sprint.tickets, ticket]
@@ -175,7 +150,7 @@ const ProjectPage = () => {
         } else {
             setSprints(prev => 
             prev.map(sprint => {
-                if (sprint.title === taskSource.sprintTitle) {
+                if (sprint.id === taskSource.sprintId) {
                 return {
                     ...sprint,
                     tickets: sprint.tickets.map(t => 
@@ -238,9 +213,10 @@ const ProjectPage = () => {
                             <CardSprint
                                 key={index}
                                 sprint={sprint}
+                                index={index}
                                 onTaskClick={(task) => handleTaskClick(task, { 
                                 type: 'sprint', 
-                                sprintTitle: sprint.title 
+                                sprintTitle: sprint.title
                                 })}
                                 onDragStart={(e, ticket) => handleDragStart(e, ticket, { 
                                     type: 'sprint', 
@@ -250,7 +226,7 @@ const ProjectPage = () => {
                                 onDragLeave={handleDragLeave}
                                 onDrop={(e) => handleDrop(e, { 
                                     type: 'sprint', 
-                                    sprintTitle: sprint.title 
+                                    sprintTitle: sprint.title
                                 })}
                             />
                         ))}

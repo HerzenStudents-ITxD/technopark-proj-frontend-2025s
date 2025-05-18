@@ -15,6 +15,7 @@ const EditProjectPage = () => {
     const [selectedInstituteId, setSelectedInstituteId] = useState(null);
     const [selectedSchoolId, setSelectedSchoolId] = useState(null);
     const [error, setError] = useState(null);
+    const [durationValue, setDurationValue] = useState(7);
 
     // Состояния для хранения данных формы
     const [formData, setFormData] = useState({
@@ -22,7 +23,7 @@ const EditProjectPage = () => {
         description: '',
         course: 1, // по умолчанию 1 курс
         year: new Date().getFullYear(),
-        sprintDuration: 1, // 1 неделя по умолчанию
+        sprintDuration: durationValue,
         startDate: new Date().toISOString().split('T')[0], // текущая дата
         instituteId: null,
 		schoolId: null,
@@ -314,10 +315,13 @@ const EditProjectPage = () => {
                         <Selector
                             label="Длительность спринта"
                             options={[
-                                { value: "1", label: "1 неделя" },
-                                { value: "2", label: "2 недели" },
+                                { value: "7", label: "1 неделя" },
+                                { value: "14", label: "2 недели" },
                             ]}
-                            
+                            onChange={(selectedOption) => {
+                                setDurationValue(selectedOption.value);
+                                handleSelectChange('sprintDuration', selectedOption.value);
+                            }}
                             sm1="6"
                             sm2="6"
                         />

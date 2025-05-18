@@ -5,11 +5,12 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { Button } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
-import { getInstitutes, getStudents, getSchoolsByInstitute, createProject } from '../services/api';
+import { getInstitutes, getStudents, getSchoolsByInstitute, createProject, getStudentsBySchool } from '../services/api';
 
 const EditProjectPage = () => {
     const [institutes, setInstitutes] = useState([]);
-    const [students, setStudents] = useState([]);
+	const [allStudents, setAllStudents] = useState([]);
+    const [filteredStudents, setFilteredStudents] = useState([]);
     const [schools, setSchools] = useState([]);
     const [selectedInstituteId, setSelectedInstituteId] = useState(null);
     const [selectedSchoolId, setSelectedSchoolId] = useState(null);
@@ -41,15 +42,16 @@ const EditProjectPage = () => {
         }, []);
 
     useEffect(() => {
-            const fetchStudents = async () => {
+            const fetchAllStudents = async () => {
                 try {
                     const response = await getStudents();
-                    setStudents(response.students);
+                    setAllStudents(response.students);
+					setFilteredStudents(response.students);
                 } catch (err) {
                     setError(err.message);
                 }
             };
-            fetchStudents();
+            fetchAllStudents();
         }, []);
 
     useEffect(() => {
@@ -68,6 +70,33 @@ const EditProjectPage = () => {
             setSchools([]);
         }
     }, [selectedInstituteId]);
+
+	useEffect(() => {
+		if (selectedSchoolId) {
+			const fetchStudentsBySchool = async () => {
+				try {
+					const response = await getStudentsBySchool(selectedSchoolId);
+					setFilteredStudents(response.students);
+					setFormData(prev => ({...prev, schoolId: parseInt(selectedSchoolId)}));
+					
+					// Remove students that don't belong to the selected school
+					setFormData(prev => ({
+						...prev,
+						studentIds: prev.studentIds.filter(id => 
+							response.students.some(student => student.studentId === parseInt(id))
+						)
+					}));
+				} catch (err) {
+					setError(err.message);
+				}
+			};
+			fetchStudentsBySchool();
+		} else {
+			// If no school selected, show all students
+			setFilteredStudents(allStudents);
+			setFormData(prev => ({...prev, schoolId: null}));
+		}
+	}, [selectedSchoolId, allStudents]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -231,11 +260,11 @@ const EditProjectPage = () => {
                     </Col>
                 </Row>
                 <Selector
-                    label="Студенты"
-					options={students.map(student => ({
+					label="Студенты"
+					options={formData.schoolId ? filteredStudents.map(student => ({
 						value: student.studentId.toString(),
 						label: student.fullName,
-					}))}
+					})) : []}
 					onChange={(selectedOptions) => {
 						handleSelectChange('studentIds', selectedOptions);
 					}}
@@ -245,39 +274,40 @@ const EditProjectPage = () => {
 					sm1="4"
 					sm2="8"
 					value={formData.studentIds.map(id => {
-						const student = students.find(s => s.studentId.toString() === id);
+						const student = allStudents.find(s => s.studentId.toString() === id);
 						return {
 							value: id,
 							label: student ? `${student.fullName} (ID: ${id})` : id
 						};
 					})}
-                />
+					placeholder={formData.schoolId ? "Выберите студентов" : "Сначала выберите направление"}
+				/>
 				{formData.studentIds.length > 0 && (
-					<div className="mt-2 mb-3">
-						<small className="text-muted">Выбрано студентов: {formData.studentIds.length}</small>
-						<div className="d-flex flex-wrap gap-2 mt-2">
-							{formData.studentIds.map(id => {
-								const student = students.find(s => s.studentId.toString() === id);
-								return student ? (
-									<span key={id} className="badge bg-info text-dark p-2 d-flex align-items-center">
-										{student.fullName}
-										<button 
-											type="button" 
-											className="btn-close btn-close-white ms-2" 
-											style={{fontSize: '0.5rem'}}
-											onClick={(e) => {
-												e.preventDefault();
-												e.stopPropagation();
-												handleRemoveStudent(id);
-											}}
-											aria-label={`Удалить ${student.fullName}`}
-										/>
-									</span>
-								) : null;
-							})}
-						</div>
-					</div>
-				)}
+                    <div className="mt-2 mb-3">
+                        <small className="text-muted">Выбрано студентов: {formData.studentIds.length}</small>
+                        <div className="d-flex flex-wrap gap-2 mt-2">
+                            {formData.studentIds.map(id => {
+                                const student = allStudents.find(s => s.studentId.toString() === id);
+                                return student ? (
+                                    <span key={id} className="badge bg-info text-dark p-2 d-flex align-items-center">
+                                        {student.fullName}
+                                        <button 
+                                            type="button" 
+                                            className="btn-close btn-close-white ms-2" 
+                                            style={{fontSize: '0.5rem'}}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                handleRemoveStudent(id);
+                                            }}
+                                            aria-label={`Удалить ${student.fullName}`}
+                                        />
+                                    </span>
+                                ) : null;
+                            })}
+                        </div>
+                    </div>
+                )}
 				
                 <Row>
                     <Col sm="8">

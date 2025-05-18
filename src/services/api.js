@@ -83,3 +83,11 @@ export const getProjectById = async (id) => {
     }
     return await response.json();
 };
+
+export const getStudentsBySchool = async (id) => {
+	const response = await fetch(`${API_BASE_URL}/student/students-by-id?id=${id}`);
+	if (!response.ok) {
+        throw new Error('Failed to fetch project');
+    }
+    return await response.json();
+};

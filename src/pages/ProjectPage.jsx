@@ -7,7 +7,7 @@ import CardSprint from "../components/CardSprint";
 import CardBacklog from "../components/CardBacklog";
 import TicketModal from './TicketModal';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getProjectById } from '../services/api';
+import { getProjectById, updateTicketSprint } from '../services/api';
 
 const ProjectPage = () => {
     const { id } = useParams();
@@ -17,6 +17,7 @@ const ProjectPage = () => {
     const [error, setError] = useState(null);
     const [sprints, setSprints] = useState([]);
     const [backlogTickets, setBacklogTickets] = useState([]);
+	const [backlogSprintId, setBacklogSprintId] = useState(null)
 
     useEffect(() => {
         const fetchProject = async () => {
@@ -40,29 +41,13 @@ const ProjectPage = () => {
                     })) || [];
 
                     // Ищем бэклог и обрабатываем его
-                    let filteredSprints = [...transformedSprints];
+                    const backlogSprint = transformedSprints.find(sprint => sprint.isBacklog);
+					const regularSprints = transformedSprints.filter(sprint => !sprint.isBacklog);
                     let backlogFound = false;
 
-                    for (let i = 0; i < transformedSprints.length; i++) {
-                        const sprint = transformedSprints[i];
-                        
-                        if (sprint.isBacklog) {
-                            // Устанавливаем тикеты бэклога
-                            setBacklogTickets(sprint.tickets || []);
-                            // Удаляем бэклог из массива спринтов
-                            filteredSprints = transformedSprints.filter(s => !s.isBacklog);
-                            backlogFound = true;
-                            break;
-                        }
-                    }
-
-                    // Если бэклог не найден, используем все спринты
-                    if (!backlogFound) {
-                        filteredSprints = transformedSprints;
-                    }
-
-                    // Устанавливаем спринты (без бэклога, если он был)
-                    setSprints(filteredSprints);
+					setSprints(regularSprints);
+					setBacklogTickets(backlogSprint?.tickets || []);
+					setBacklogSprintId(backlogSprint?.id || null); 
                 }
                 setLoading(false);
             } catch (err) {
@@ -91,48 +76,57 @@ const ProjectPage = () => {
         e.currentTarget.classList.remove('drag-over');
     };
 
-    const handleDrop = (e, target) => {
-		e.preventDefault();
-		e.currentTarget.classList.remove('drag-over');
+const handleDrop = async (e, target) => {
+    e.preventDefault();
+    e.currentTarget.classList.remove('drag-over');
 
-		const ticketData = e.dataTransfer.getData('ticket');
-		const sourceData = e.dataTransfer.getData('source');
-		
-		if (!ticketData || !sourceData) return;
+    const ticketData = e.dataTransfer.getData('ticket');
+    const sourceData = e.dataTransfer.getData('source');
+    
+    if (!ticketData || !sourceData) return;
 
-		const ticket = JSON.parse(ticketData);
-		const source = JSON.parse(sourceData);
+    const ticket = JSON.parse(ticketData);
+    const source = JSON.parse(sourceData);
 
-		// Remove from source
-		if (source.type === 'backlog') {
-			setBacklogTickets(prev => prev.filter(t => t.id !== ticket.id));
-		} else {
-			setSprints(prev => prev.map(sprint => {
-				if (sprint.id === source.sprintId) {
-					return {
-						...sprint,
-						tickets: sprint.tickets.filter(t => t.id !== ticket.id)
-					};
-				}
-				return sprint;
-			}));
-		}
+    try {
+        // Update backend first
+        await updateTicketSprint(ticket.id, target.sprintId);
+        
+        // Remove from source (whether it's backlog or regular sprint)
+        if (source.sprintId === backlogSprintId) {
+            // If coming from backlog
+            setBacklogTickets(prev => prev.filter(t => t.id !== ticket.id));
+        } else {
+            // If coming from regular sprint
+            setSprints(prev => prev.map(sprint => {
+                if (sprint.id === source.sprintId) {
+                    return {
+                        ...sprint,
+                        tickets: sprint.tickets.filter(t => t.id !== ticket.id)
+                    };
+                }
+                return sprint;
+            }));
+        }
 
-		// Add to target
-		if (target.type === 'backlog') {
-			setBacklogTickets(prev => [...prev, ticket]);
-		} else {
-			setSprints(prev => prev.map(sprint => {
-				if (sprint.id === target.sprintId) {
-					return {
-						...sprint,
-						tickets: [...sprint.tickets, ticket]
-					};
-				}
-				return sprint;
-			}));
-		}
-	};
+        // Add to target
+        if (target.sprintId === backlogSprintId) {
+            setBacklogTickets(prev => [...prev, ticket]);
+        } else {
+            setSprints(prev => prev.map(sprint => {
+                if (sprint.id === target.sprintId) {
+                    return {
+                        ...sprint,
+                        tickets: [...sprint.tickets, ticket]
+                    };
+                }
+                return sprint;
+            }));
+        }
+    } catch (err) {
+        console.error('Failed to update ticket sprint:', err);
+    }
+};
 
     const [showModal, setShowModal] = useState(false);
     const [selectedTask, setSelectedTask] = useState(null);
@@ -227,8 +221,7 @@ const ProjectPage = () => {
                                 onDragOver={handleDragOver}
                                 onDragLeave={handleDragLeave}
 								onDrop={(e) => handleDrop(e, { 
-									type: 'sprint', 
-									sprintId: sprint.id // using ID instead of title
+									sprintId: sprint.id
 								})}
                             />
                         ))}
@@ -236,20 +229,24 @@ const ProjectPage = () => {
                 </div>
 
                 {/* Бэклог */}
-                <CardBacklog
-                    tickets={backlogTickets}
-                    onTaskClick={(task) => handleTaskClick(task, { 
-                    type: 'backlog' 
-                    })}
-                    onDragStart={(e, ticket) => handleDragStart(e, ticket, { 
-                        type: 'backlog' 
-                    })}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={(e) => handleDrop(e, { 
-                        type: 'backlog' 
-                    })}
-                />
+				<CardBacklog
+					tickets={backlogTickets}
+					sprintId={backlogSprintId} // Pass the backlog sprint ID
+					onTaskClick={(task) => handleTaskClick(task, { 
+						type: 'sprint', 
+						sprintId: backlogSprintId // Use the backlog sprint ID
+					})}
+					onDragStart={(e, ticket) => handleDragStart(e, ticket, { 
+						type: 'sprint', 
+						sprintId: backlogSprintId // Use the backlog sprint ID
+					})}
+					onDragOver={handleDragOver}
+					onDragLeave={handleDragLeave}
+					onDrop={(e) => handleDrop(e, { 
+						type: 'sprint',
+						sprintId: backlogSprintId // Use the backlog sprint ID
+					})}
+				/>
 
                 {/* Модальное окно */}
                 <TicketModal

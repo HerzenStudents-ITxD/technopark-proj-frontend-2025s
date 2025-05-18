@@ -9,7 +9,7 @@ export async function getProjects(search = '') {
     });
     
     if (!response.ok) {
-        throw new Error('Failed to fetch projects');
+        throw new Error('Failed to get projects');
     }
     
     return await response.json();
@@ -24,7 +24,7 @@ export async function getInstitutes() {
     });
     
     if (!response.ok) {
-        throw new Error('Failed to fetch projects');
+        throw new Error('Failed to get institutes');
     }
     
     return await response.json();
@@ -39,7 +39,7 @@ export async function getStudents() {
     });
     
     if (!response.ok) {
-        throw new Error('Failed to fetch projects');
+        throw new Error('Failed to get students');
     }
     
     return await response.json();
@@ -54,7 +54,7 @@ export async function getSchoolsByInstitute(instituteId) {
     });
     
     if (!response.ok) {
-        throw new Error('Failed to fetch projects');
+        throw new Error('Failed to get schools by institute');
     }
     
     return await response.json();
@@ -70,7 +70,7 @@ export const createProject = async (projectData) => {
     });
     
     if (!response.ok) {
-        throw new Error('Ошибка при создании проекта');
+        throw new Error('Failed to create project');
     }
     
     return await response.json();
@@ -79,7 +79,7 @@ export const createProject = async (projectData) => {
 export const getProjectById = async (id) => {
     const response = await fetch(`${API_BASE_URL}/controller/project/proj-by-id?id=${id}`);
     if (!response.ok) {
-        throw new Error('Failed to fetch project');
+        throw new Error('Failed to get project by id');
     }
     return await response.json();
 };
@@ -87,7 +87,22 @@ export const getProjectById = async (id) => {
 export const getStudentsBySchool = async (id) => {
 	const response = await fetch(`${API_BASE_URL}/student/students-by-id?id=${id}`);
 	if (!response.ok) {
-        throw new Error('Failed to fetch project');
+        throw new Error('Failed to get students by school');
     }
     return await response.json();
+};
+
+
+export const updateTicketSprint = async (ticketId, newSprintId) => {
+	const response = await fetch(`${API_BASE_URL}/controller/ticket/update-sprint?ticketId=${ticketId}`, {
+		method: 'PUT',
+		headers: {
+            'Content-Type': 'application/json',
+        },
+		body: JSON.stringify(newSprintId)
+	});
+	if (!response.ok) {
+        throw new Error('Failed to update ticket sprint');
+    }
+	return await response.json();
 };

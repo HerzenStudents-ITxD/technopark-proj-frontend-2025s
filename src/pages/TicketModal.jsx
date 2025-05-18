@@ -4,26 +4,43 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import Forma from "../components/Forma";
 import Selector from '../components/Selector';
+import { FormGroup } from 'react-bootstrap';
 
-export default function TicketModal({show, handleClose, task, handleSave}) {
+export default function TicketModal({
+    show,
+    handleClose,
+    task,
+    handleSave,
+    isNew = false,
+    onTitleChange,
+    onStatusChange,
+    onDescriptionChange,
+    availableSprints = []
+}) {
     const [status, setStatus] = useState(task?.status || "0");
+    const [title, setTitle] = useState(task?.title || "");
+    const [description, setDescription] = useState(task?.description || "");
+    const [selectedSprint, setSelectedSprint] = useState(task?.sprintId?.toString() || "");
 
     useEffect(() => {
         if (task) {
-        setStatus(task.status);
+            setStatus(task.status);
+            setTitle(task.title || "");
+            setDescription(task.description || "");
+            setSelectedSprint(task.sprintId?.toString() || "");
         }
     }, [task]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        handleSave({ ...task, status });
+        handleSave({ ...task, status, title, description, sprintId: selectedSprint ? parseInt(selectedSprint) : null });
         handleClose();
     };
 
     return (
         <Modal show={show} onHide={handleClose}>
             <Modal.Header closeButton>
-                <Modal.Title>Редактирование задачи</Modal.Title>
+                <Modal.Title>{isNew ? 'Создание задачи' : 'Редактирование задачи'}</Modal.Title>
             </Modal.Header>
             <Form onSubmit={handleSubmit}>
                 <Modal.Body>
@@ -38,11 +55,17 @@ export default function TicketModal({show, handleClose, task, handleSave}) {
                         <Form.Label>Название задачи</Form.Label>
                         <Form.Control 
                             type="text" 
-                            value={task?.title || ""} 
-                            readOnly
+                            value={title}
+                            onChange={(e) => {
+                                setTitle(e.target.value);
+                                onTitleChange?.(e.target.value);
+                            }}
+                            required
+                            //readOnly={!isNew}
                         />
                     </Form.Group>
-                    <div className="mb-3">
+
+                    <FormGroup className="mb-3">
                         {/* <Selector
                             label="Статус"
                             value={status}
@@ -58,17 +81,33 @@ export default function TicketModal({show, handleClose, task, handleSave}) {
                         <Form.Label>Статус</Form.Label>
                         <Form.Select 
                             value={status} 
-                            onChange={(e) => setStatus(e.target.value)}
+                            onChange={(e) => {
+                                setStatus(e.target.value);
+                                onStatusChange?.(e.target.value);
+                            }}
                         >
                             <option value="0">Не начата</option>
                             <option value="1">В работе</option>
                             <option value="2">Завершена</option>
                         </Form.Select>
-                    </div>
+                    </FormGroup>
+                    
+                    <Form.Group className="mb-3">
+                        <Form.Label>Описание</Form.Label>
+                        <Form.Control
+                            as="textarea"
+                            rows={3}
+                            value={description}
+                            onChange={(e) => {
+                                setDescription(e.target.value);
+                                onDescriptionChange?.(e.target.value);
+                            }}
+                        />
+                    </Form.Group>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button className='btn-main-color float-end' type="submit">
-                        Сохранить
+                        {isNew ? 'Создать' : 'Сохранить'}
                     </Button>
                 </Modal.Footer>
             </Form>

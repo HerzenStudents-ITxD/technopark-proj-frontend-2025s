@@ -105,4 +105,36 @@ export const updateTicketSprint = async (ticketId, newSprintId) => {
         throw new Error('Failed to update ticket sprint');
     }
 	return await response.json();
+}
+
+export const createTicket = async (ticketData) => {
+    const response = await fetch(`${API_BASE_URL}/controller/ticket`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(ticketData)
+    });
+    
+    if (!response.ok) {
+        throw new Error('Failed to create ticket');
+    }
+    
+    return await response.json();
+};
+
+export const updateTicket = async (ticketId, ticketData) => {
+    const response = await fetch(`${API_BASE_URL}/controller/ticket/update-ticket/${ticketId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(ticketData)
+    });
+    
+    if (!response.ok) {
+        throw new Error('Failed to update ticket');
+    }
+    
+    return await response.json();
 };

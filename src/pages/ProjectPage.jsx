@@ -7,7 +7,7 @@ import CardSprint from "../components/CardSprint";
 import CardBacklog from "../components/CardBacklog";
 import TicketModal from './TicketModal';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getProjectById, updateTicketSprint } from '../services/api';
+import { getProjectById, updateTicketSprint, createTicket, updateTicket } from '../services/api';
 
 const ProjectPage = () => {
     const { id } = useParams();
@@ -28,15 +28,16 @@ const ProjectPage = () => {
                     setProject(projectData);
                     
                     // Преобразование данных спринтов и тикетов из API
-                    // Здесь нужно адаптировать под вашу структуру данных
                     const transformedSprints = projectData.sprints?.map(sprint => ({
-                        id: sprint.id, // сохраняем ID спринта
-                        title: sprint.name, // сохраняем название спринта
-                        isBacklog: sprint.isBacklog || false, // добавляем флаг бэклога
+                        id: sprint.id,
+                        title: sprint.isBacklog ? "Бэклог" : `Спринт ${sprint.id}`,
+                        isBacklog: sprint.isBacklog || false,
+                        status: sprint.status,
                         tickets: sprint.tickets?.map(ticket => ({
                             id: ticket.id,
                             title: ticket.name,
-                            status: ticket.status.toString()
+                            status: ticket.status.toString(),
+                            description: ticket.description
                         })) || []
                     })) || [];
 
@@ -128,35 +129,97 @@ const handleDrop = async (e, target) => {
     }
 };
 
+    const handleCreateTicket = async (newTicketData) => {
+        try {
+            // Находим ID бэклога (спринта с IsBacklog = true)
+            const backlogSprint = project.sprints?.find(s => s.isBacklog);
+            
+            if (!backlogSprint) {
+                throw new Error('Backlog sprint not found');
+            }
+
+            // Отправляем запрос на создание задачи
+            const response = await createTicket({
+                Name: newTicketData.title,
+                Status: parseInt(newTicketData.status),
+                Description: newTicketData.description,
+                SprintId: backlogSprint.id // ID спринта-бэклога
+            });
+
+            // Обновляем локальное состояние
+            const newTicket = {
+                id: response.ticketId,
+                title: response.ticketName,
+                status: response.ticketStatus.toString(),
+                description: response.ticketDescription
+            };
+
+            // Добавляем новую задачу в бэклог
+            setBacklogTickets(prev => [...prev, newTicket]);
+            
+            return true;
+        } catch (error) {
+            console.error('Ошибка при создании задачи:', error);
+            return false;
+        }
+    };
+
     const [showModal, setShowModal] = useState(false);
     const [selectedTask, setSelectedTask] = useState(null);
     const [taskSource, setTaskSource] = useState(null);
 
     const handleTaskClick = (task, source) => {
-        setSelectedTask(task);
+        setSelectedTask({
+            ...task,
+            sprintId: source.sprintId
+        });
         setTaskSource(source);
         setShowModal(true);
     };
 
-	const handleSaveTask = (updatedTask) => {
-		if (taskSource.type === 'backlog') {
-			setBacklogTickets(prev => 
-				prev.map(t => t.id === updatedTask.id ? updatedTask : t)
-			);
-		} else {
-			setSprints(prev => 
-				prev.map(sprint => {
-					if (sprint.id === taskSource.sprintId) {
-						return {
-							...sprint,
-							tickets: sprint.tickets.map(t => 
-								t.id === updatedTask.id ? updatedTask : t)
-						};
-					}
-					return sprint;
-				})
-			);
-		}
+	const handleSaveTask = async (updatedTask) => {
+        try {
+            console.log(updatedTask);
+            console.log(taskSource.type);
+            const response = await updateTicket(updatedTask.id, {
+                    Name: updatedTask.title,
+                    Status: parseInt(updatedTask.status),
+                    Description: updatedTask.description,
+                    //SprintId: taskSource.type === 'backlog' ? null : taskSource.sprintId
+                    SprintId: taskSource.sprintId
+                });
+
+            if (taskSource.type === 'backlog') {
+                setBacklogTickets(prev => 
+                    prev.map(t => t.id === updatedTask.id ? {
+                        ...t,
+                        title: updatedTask.title,
+                        status: updatedTask.status,
+                        description: updatedTask.description
+                    } : t)
+                );
+            } else {
+                setSprints(prev => 
+                    prev.map(sprint => {
+                        if (sprint.id === (updatedTask.sprintId || taskSource.sprintId)) {
+                            return {
+                                ...sprint,
+                                tickets: sprint.tickets.map(t => 
+                                    t.id === updatedTask.id ? {
+                                        ...t,
+                                        title: updatedTask.title,
+                                        status: updatedTask.status,
+                                        description: updatedTask.description
+                                    } : t)
+                            };
+                        }
+                        return sprint;
+                    })
+                );
+            } 
+        } catch (error) {
+            console.error('Ошибка при обновлении задачи:', error);
+        }
 	};
 
     if (loading) return <div>Загрузка...</div>;
@@ -233,19 +296,20 @@ const handleDrop = async (e, target) => {
 					tickets={backlogTickets}
 					sprintId={backlogSprintId} // Pass the backlog sprint ID
 					onTaskClick={(task) => handleTaskClick(task, { 
-						type: 'sprint', 
+						type: 'backlog', 
 						sprintId: backlogSprintId // Use the backlog sprint ID
 					})}
 					onDragStart={(e, ticket) => handleDragStart(e, ticket, { 
-						type: 'sprint', 
+						type: 'backlog', 
 						sprintId: backlogSprintId // Use the backlog sprint ID
 					})}
 					onDragOver={handleDragOver}
 					onDragLeave={handleDragLeave}
 					onDrop={(e) => handleDrop(e, { 
-						type: 'sprint',
+						type: 'backlog',
 						sprintId: backlogSprintId // Use the backlog sprint ID
 					})}
+                     onCreateTicket={handleCreateTicket}
 				/>
 
                 {/* Модальное окно */}

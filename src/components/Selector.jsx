@@ -5,9 +5,23 @@ import Label from "../components/Label";
 
 export default function Selector(props) {
     const selectOptions = props.options?.map(option => ({
-        value: option.value,
+        value: option.value.toString(),
         label: option.label
     })) || [];
+
+	const normalizedValue = () => {
+		if (props.isMulti) {
+			return selectOptions.filter(opt => props.value?.includes(opt.value));
+		} else {
+			if (!props.value) return null;
+			
+			// Handle both string and object values
+			if (typeof props.value === 'object') {
+				return selectOptions.find(opt => opt.value === props.value.value?.toString());
+			}
+			return selectOptions.find(opt => opt.value === props.value?.toString());
+		}
+	};
 
     return (
         <Row>
@@ -18,10 +32,7 @@ export default function Selector(props) {
                 <Select
                     className="mb-3"
                     options={selectOptions}
-					value={props.isMulti 
-                        ? selectOptions.filter(opt => props.value?.includes(opt.value))
-                        : selectOptions.find(opt => opt.value === props.value)
-                    }
+					value={normalizedValue()}
                     onChange={props.onChange}
                     placeholder={props.placeholder || "Выберите..."}
 					isMulti={props.isMulti}

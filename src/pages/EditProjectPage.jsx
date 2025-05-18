@@ -271,9 +271,14 @@ const EditProjectPage = () => {
                         value: institute.instituteId.toString(),
                         label: institute.instituteName
                     }))}
+					value={formData.instituteId ? {
+						value: formData.instituteId.toString(),
+						label: institutes.find(i => i.instituteId === formData.instituteId)?.instituteName || ''
+					} : null}
                     onChange={(selectedOption) => {
                         setSelectedInstituteId(selectedOption.value);
                         setSelectedSchoolId(null); // Reset school selection
+						handleSelectChange('instituteId', selectedOption.value);
                     }}
                     sm1="4"
                     sm2="8"
@@ -286,6 +291,10 @@ const EditProjectPage = () => {
                                 value: school.schoolId.toString(),
                                 label: school.schoolName
                             }))}
+							value={formData.schoolId ? {
+								value: formData.schoolId.toString(),
+								label: schools.find(s => s.schoolId === formData.schoolId)?.schoolName || ''
+							} : null}
                             onChange={(selectedOption) => {
                                 setSelectedSchoolId(selectedOption.value);
                                 handleSelectChange('schoolId', selectedOption.value);
@@ -304,6 +313,10 @@ const EditProjectPage = () => {
                                 { value: "3", label: "3" },
                                 { value: "4", label: "4" },
                             ]}
+							value={formData.course ? {
+								value: formData.course.toString(),
+								label: formData.course.toString()
+							} : null}
                             onChange={(selectedOption) => handleSelectChange('course', selectedOption.value)}
                             sm1="4"
                             sm2="8"
@@ -318,6 +331,11 @@ const EditProjectPage = () => {
                                 { value: "1", label: "Весна" },
                                 { value: "2", label: "Осень" },
                             ]}
+							value={formData.semester ? {
+								value: formData.semester.toString(),
+								label: formData.semester === 1 ? "Весна" : "Осень"
+							} : null}
+							onChange={(selectedOption) => handleSelectChange('semester', selectedOption.value)}
                             sm1="6"
                             sm2="6"
                         />
@@ -331,7 +349,11 @@ const EditProjectPage = () => {
                                 { value: "2024", label: "2024" },
                                 { value: "2025", label: "2025" },
                             ]}
-                            onChange={(selectedOption) => handleSelectChange('year', selectedOption.value)}
+                            value={formData.year ? {
+								value: formData.year.toString(),
+								label: formData.year.toString()
+							} : null}
+							onChange={(selectedOption) => handleSelectChange('year', selectedOption.value)}
                             sm1="4"
                             sm2="8"
                         />
@@ -395,6 +417,11 @@ const EditProjectPage = () => {
                                 { value: "7", label: "1 неделя" },
                                 { value: "14", label: "2 недели" },
                             ]}
+							value={formData.sprintDuration ? {
+								value: formData.sprintDuration.toString(),
+								label: formData.sprintDuration === 7 ? "1 неделя" : "2 недели"
+							} : null}
+							
                             onChange={(selectedOption) => {
                                 setDurationValue(selectedOption.value);
                                 handleSelectChange('sprintDuration', selectedOption.value);

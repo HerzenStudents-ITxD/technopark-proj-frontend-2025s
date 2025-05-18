@@ -54,15 +54,40 @@ const ProjectPage = () => {
                     // Преобразование данных спринтов и тикетов из API
                     // Здесь нужно адаптировать под вашу структуру данных
                     const transformedSprints = projectData.sprints?.map(sprint => ({
+                        id: sprint.id, // сохраняем ID спринта
+                        title: sprint.name, // сохраняем название спринта
+                        isBacklog: sprint.isBacklog || false, // добавляем флаг бэклога
                         tickets: sprint.tickets?.map(ticket => ({
+                            id: ticket.id,
                             title: ticket.name,
                             status: ticket.status.toString()
                         })) || []
                     })) || [];
-                    
-                    setSprints(transformedSprints);
-                    // Бэклог может быть отдельным полем или вам нужно его вычислять
-                    setBacklogTickets([]); // Или заполнить из данных проекта
+
+                    // Ищем бэклог и обрабатываем его
+                    let filteredSprints = [...transformedSprints];
+                    let backlogFound = false;
+
+                    for (let i = 0; i < transformedSprints.length; i++) {
+                        const sprint = transformedSprints[i];
+                        
+                        if (sprint.isBacklog) {
+                            // Устанавливаем тикеты бэклога
+                            setBacklogTickets(sprint.tickets || []);
+                            // Удаляем бэклог из массива спринтов
+                            filteredSprints = transformedSprints.filter(s => !s.isBacklog);
+                            backlogFound = true;
+                            break;
+                        }
+                    }
+
+                    // Если бэклог не найден, используем все спринты
+                    if (!backlogFound) {
+                        filteredSprints = transformedSprints;
+                    }
+
+                    // Устанавливаем спринты (без бэклога, если он был)
+                    setSprints(filteredSprints);
                 }
                 setLoading(false);
             } catch (err) {

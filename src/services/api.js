@@ -7,6 +7,7 @@ export async function getProjects(search = '') {
             'Content-Type': 'application/json',
         },
     });
+	console.log(API_BASE_URL);
     
     if (!response.ok) {
         throw new Error('Failed to get projects');

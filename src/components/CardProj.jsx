@@ -32,13 +32,13 @@ export default function CardProj() {
             {projects.map((project) => (
                 <div className='col-4' style={{marginBottom:'4%'}} key={project.projectId}>
                     <Card
-                        style={{ width: '22rem', height:'40vh', border: "1px solid #68ACC6"}}
+                        style={{ width: '46vh', height:'50vh', border: "1px solid #68ACC6"}}
                         onClick={(e) => navigate(`/project/${project.projectId}`)}
                     >
                         <Card.Body className="d-flex flex-column">
                             <Card.Text className='main-color text-uppercase'>{project.semester?"Осень":"Весна"}{" "}{project.year}</Card.Text>
                             <Card.Title>{project.projectName}</Card.Title>
-                            <Card.Text className='mt-4' style={{height:'10vh'}}>
+                            <Card.Text className='mt-2 mb-1' style={{height:'20vh'}}>
                                 {project.description}
                             </Card.Text>
                             <div>

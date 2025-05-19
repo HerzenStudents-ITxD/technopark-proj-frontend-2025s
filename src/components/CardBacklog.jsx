@@ -39,7 +39,7 @@ export default function CardBacklog({
     return (
         <>
             <Card 
-                className='mt-5' 
+                className='mt-5 mb-5' 
                 style={{ border: "1px solid #68ACC6", borderRadius: "0.7rem" }}
                 onDragOver={onDragOver}
                 onDragLeave={onDragLeave}

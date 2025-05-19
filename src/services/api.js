@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5132';
+const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:5132' : 'https://itvd.online/technopark-proj/api/';
 
 export async function getProjects(search = '') {
     const response = await fetch(`${API_BASE_URL}/controller/project/all-projects?search=${encodeURIComponent(search)}`, {

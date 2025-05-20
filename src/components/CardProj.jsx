@@ -32,7 +32,7 @@ export default function CardProj() {
             {projects.map((project) => (
                 <div className='col-4' style={{marginBottom:'4%'}} key={project.projectId}>
                     <Card
-                        style={{ width: '46vh', height:'50vh', border: "1px solid #68ACC6"}}
+                        style={{ width: '46vh', height:'40vh', border: "1px solid #68ACC6"}}
                         onClick={(e) => navigate(`/project/${project.projectId}`)}
                     >
                         <Card.Body className="d-flex flex-column">

@@ -125,7 +125,7 @@ const EditProjectPage = () => {
                             description: projectResponse.project.description || '',
                             course: projectResponse.project.course || 1,
                             year: projectResponse.project.year || new Date().getFullYear(),
-                            semester: projectResponse.project.semester || 1,
+                            semester: projectResponse.project.semester,
                             sprintDuration: projectResponse.project.sprintDuration || 7,
                             startDate: projectResponse.project.startDate || new Date().toISOString().split('T')[0],
                             instituteId: projectResponse.project.instituteId || null,
@@ -227,7 +227,8 @@ const EditProjectPage = () => {
                 StartDate: formData.startDate,
                 InstituteId: formData.instituteId,
                 SchoolId: formData.schoolId,
-                StudentIds: formData.studentIds.map(id => parseInt(id))
+                StudentIds: formData.studentIds.map(id => parseInt(id)), 
+                Semester: formData.semester
             };
 
             if (isEditMode) {

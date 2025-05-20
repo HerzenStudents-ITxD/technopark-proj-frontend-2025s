@@ -3,7 +3,7 @@ const API_BASE_URL = window.location.hostname === 'localhost'
   : 'https://itvd.online/technopark-proj/api';
 
 export async function getProjects(search = '') {
-    const response = await fetch(`${API_BASE_URL}/controller/project/all-projects?search=${encodeURIComponent(search)}`, {
+    const response = await fetch(`${API_BASE_URL.replace(/\/$/, '')}/controller/project/all-projects?search=${encodeURIComponent(search)}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -19,7 +19,7 @@ export async function getProjects(search = '') {
 }
 
 export async function getInstitutes() {
-    const response = await fetch(`${API_BASE_URL}/institute`, {
+    const response = await fetch(`${API_BASE_URL.replace(/\/$/, '')}/institute`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -34,7 +34,7 @@ export async function getInstitutes() {
 }
 
 export async function getStudents() {
-    const response = await fetch(`${API_BASE_URL}/student`, {
+    const response = await fetch(`${API_BASE_URL.replace(/\/$/, '')}/student`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -49,7 +49,7 @@ export async function getStudents() {
 }
 
 export async function getSchoolsByInstitute(instituteId) {
-    const response = await fetch(`${API_BASE_URL}/school?instituteId=${instituteId}`, {
+    const response = await fetch(`${API_BASE_URL.replace(/\/$/, '')}/school?instituteId=${instituteId}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -64,7 +64,7 @@ export async function getSchoolsByInstitute(instituteId) {
 }
 
 export const createProject = async (projectData) => {
-    const response = await fetch(`${API_BASE_URL}/controller/project`, {
+    const response = await fetch(`${API_BASE_URL.replace(/\/$/, '')}/controller/project`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -80,7 +80,7 @@ export const createProject = async (projectData) => {
 };
 
 export const getProjectById = async (id) => {
-    const response = await fetch(`${API_BASE_URL}/controller/project/proj-by-id?id=${id}`);
+    const response = await fetch(`${API_BASE_URL.replace(/\/$/, '')}/controller/project/proj-by-id?id=${id}`);
     if (!response.ok) {
         throw new Error('Failed to get project by id');
     }
@@ -88,7 +88,7 @@ export const getProjectById = async (id) => {
 };
 
 export const getStudentsBySchool = async (id) => {
-	const response = await fetch(`${API_BASE_URL}/student/students-by-id?id=${id}`);
+	const response = await fetch(`${API_BASE_URL.replace(/\/$/, '')}/student/students-by-id?id=${id}`);
 	if (!response.ok) {
         throw new Error('Failed to get students by school');
     }
@@ -97,7 +97,7 @@ export const getStudentsBySchool = async (id) => {
 
 
 export const updateTicketSprint = async (ticketId, newSprintId) => {
-	const response = await fetch(`${API_BASE_URL}/controller/ticket/update-sprint?ticketId=${ticketId}`, {
+	const response = await fetch(`${API_BASE_URL.replace(/\/$/, '')}/controller/ticket/update-sprint?ticketId=${ticketId}`, {
 		method: 'PUT',
 		headers: {
             'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ export const updateTicketSprint = async (ticketId, newSprintId) => {
 }
 
 export const createTicket = async (ticketData) => {
-    const response = await fetch(`${API_BASE_URL}/controller/ticket`, {
+    const response = await fetch(`${API_BASE_URL.replace(/\/$/, '')}/controller/ticket`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -127,7 +127,7 @@ export const createTicket = async (ticketData) => {
 };
 
 export const updateTicket = async (ticketId, ticketData) => {
-    const response = await fetch(`${API_BASE_URL}/controller/ticket/update-ticket/${ticketId}`, {
+    const response = await fetch(`${API_BASE_URL.replace(/\/$/, '')}/controller/ticket/update-ticket/${ticketId}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -143,7 +143,7 @@ export const updateTicket = async (ticketId, ticketData) => {
 };
 
 export const getProjectForEdit = async (id) => {
-    const response = await fetch(`${API_BASE_URL}/controller/project/edit/${id}`);
+    const response = await fetch(`${API_BASE_URL.replace(/\/$/, '')}/controller/project/edit/${id}`);
     if (!response.ok) {
         throw new Error('Failed to fetch project data');
     }
@@ -151,7 +151,7 @@ export const getProjectForEdit = async (id) => {
 };
 
 export const updateProject = async (id, projectData) => {
-    const response = await fetch(`${API_BASE_URL}/controller/project/update-project/${id}`, {
+    const response = await fetch(`${API_BASE_URL.replace(/\/$/, '')}/controller/project/update-project/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
